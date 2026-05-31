@@ -12,6 +12,7 @@ services:
       # Plugins to be installed automatically (including CasC itself)
       #- JENKINS_PLUGINS=configuration-as-code:1.55 
       # docker-workflow:1.29 
+      # job-dsl
       # kubernetes-cli:1.12.1 
       # workflow-aggregator:2.6 
       # pipeline-stage-view:2.34
@@ -19,32 +20,34 @@ services:
       #- CASC_JENKINS_CONFIG=/var/jenkins_home/casc_configs/jenkins.yaml
     volumes:
       - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
-    # depends_on:
-    #   - dind
-    #   - registry
+    depends_on:
+      - dind
+      - registry
+      - trivy
 
-  # dind:
-  #   image: docker:dind
-  #   container_name: dind
-  #   privileged: true
-  #   command: ["--host=tcp://0.0.0.0:2375", "--insecure-registry=registry:5000"]
-  #   expose:
-  #     - "2375"
-  #   environment:
-  #     - DOCKER_TLS_CERTDIR=
-  #   volumes:
-  #     - dind_storage:/var/lib/docker
-  #   restart: unless-stopped
+  dind:
+    image: docker:dind
+    container_name: dind
+    privileged: true
+    command: ["--host=tcp://0.0.0.0:2375", "--insecure-registry=registry:5000"]
+    expose:
+      - "2375"
+    environment:
+      - DOCKER_TLS_CERTDIR=
+    volumes:
+      - dind_storage:/var/lib/docker
+    restart: unless-stopped
 
-  # registry:
-  #   image: registry:2
-  #   container_name: registry
-  #   ports:
-  #     - "5000:5000"
-  #   restart: unless-stopped
-  #   volumes:
-  #     - registry_data:/var/lib/registry
+  registry:
+    image: registry:2
+    container_name: registry
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    volumes:
+      - registry_data:/var/lib/registry
 
   # gitserver:
   #   image: codeberg.org/forgejo/forgejo:15
@@ -59,15 +62,15 @@ services:
   #   ports:
   #     - '3000:3000'
   #     - '222:22'
-  # trivy:
-  #   image: aquasec/trivy:latest
-  #   container_name: trivy
-  #   entrypoint: ["sleep", "infinity"]
-  #   environment:
-  #     - DOCKER_HOST=tcp://dind:2375
-  #   volumes:
-  #     - trivy_cache:/root/.cache/
-  #   restart: unless-stopped
+  trivy:
+    image: aquasec/trivy:latest
+    container_name: trivy
+    entrypoint: ["sleep", "infinity"]
+    environment:
+      - DOCKER_HOST=tcp://dind:2375
+    volumes:
+      - trivy_cache:/root/.cache/
+    restart: unless-stopped
 
 volumes:
   jenkins_home:
