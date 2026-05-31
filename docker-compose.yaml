@@ -1,0 +1,76 @@
+services:
+  jenkins:
+    build: 
+      context: .
+      dockerfile: dockerfile.jenkins
+    #image: jenkins/jenkins:lts
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+    environment:
+      - DOCKER_HOST=tcp://dind:2375
+      # Plugins to be installed automatically (including CasC itself)
+      #- JENKINS_PLUGINS=configuration-as-code:1.55 
+      # docker-workflow:1.29 
+      # kubernetes-cli:1.12.1 
+      # workflow-aggregator:2.6 
+      # pipeline-stage-view:2.34
+      # Tell JCasC where the YAML config is
+      #- CASC_JENKINS_CONFIG=/var/jenkins_home/casc_configs/jenkins.yaml
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    restart: unless-stopped
+    depends_on:
+      - dind
+      - registry
+
+  dind:
+    image: docker:dind
+    container_name: dind
+    privileged: true
+    command: ["--host=tcp://0.0.0.0:2375", "--insecure-registry=registry:5000"]
+    expose:
+      - "2375"
+    environment:
+      - DOCKER_TLS_CERTDIR=
+    volumes:
+      - dind_storage:/var/lib/docker
+    restart: unless-stopped
+
+  registry:
+    image: registry:2
+    container_name: registry
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    volumes:
+      - registry_data:/var/lib/registry
+
+  # gitserver:
+  #   image: codeberg.org/forgejo/forgejo:15
+  #   container_name: forgejo
+  #   environment:
+  #     - USER_UID=1000
+  #     - USER_GID=1000
+  #   restart: always
+  #   volumes:
+  #     - ./forgejo:/data
+  #     - /etc/localtime:/etc/localtime:ro
+  #   ports:
+  #     - '3000:3000'
+  #     - '222:22'
+  # trivy:
+  #   image: aquasec/trivy:latest
+  #   container_name: trivy
+  #   entrypoint: ["sleep", "infinity"]
+  #   environment:
+  #     - DOCKER_HOST=tcp://dind:2375
+  #   volumes:
+  #     - trivy_cache:/root/.cache/
+  #   restart: unless-stopped
+
+volumes:
+  jenkins_home:
+  dind_storage:
+  registry_data:
+  trivy_cache:

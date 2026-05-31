@@ -1,0 +1,15 @@
+# Start from the official Jenkins LTS image
+FROM jenkins/jenkins:lts
+
+# Skip the initial setup wizard
+ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
+
+# Tell JCasC where to find the configuration file
+ENV CASC_JENKINS_CONFIG="/var/jenkins_home/casc_configs/casc.yaml"
+
+# Pre-install the required plugins using the Jenkins CLI tool
+# workflow-aggregator pulls in the standard Pipeline plugins
+RUN jenkins-plugin-cli --plugins configuration-as-code job-dsl workflow-aggregator docker-workflow 
+
+# Copy our configuration file into the container
+COPY casc.yaml /var/jenkins_home/casc_configs/casc.yaml
