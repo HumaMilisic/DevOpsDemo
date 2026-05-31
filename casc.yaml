@@ -6,31 +6,52 @@ jenkins:
   
 # 2. Job Creation via Job DSL
 jobs:
-  - script: >
-      folder('My-Automated-Projects') {
-          description('A folder created on startup')
-      }
+  - file: /var/jenkins_home/dsl/helloworld-jobs.groovy
+  - file: /var/jenkins_home/dsl/application-jobs.groovy
+# jobs:
+#   - script: >
+#       folder('My-Automated-Projects') {
+#           description('A folder created on startup')
+#       }
 
-      pipelineJob('My-Automated-Projects/Hello-World-Pipeline') {
-          description('This pipeline was injected at boot time.')
-          definition {
-              cps {
-                  // We are using an inline script here so it works out of the box.
-                  // In reality, you would point this to a Git repository using cpsScm.
-                  script('''
-                      pipeline {
-                          agent any
-                          stages {
-                              stage('Verify Setup') {
-                                  steps {
-                                      echo '✅ JCasC and Job DSL are working perfectly!'
-                                      sh 'java -version'
-                                  }
-                              }
-                          }
-                      }
-                  '''.stripIndent())
-                  sandbox(true)
-              }
-          }
-      }
+#       pipelineJob('My-Automated-Projects/Hello-World-Pipeline-other') {
+#           description('This pipeline was injected at boot time.')
+#           definition {
+#               cps {
+#                   // We are using an inline script here so it works out of the box.
+#                   // In reality, you would point this to a Git repository using cpsScm.
+#                   script('''
+#                       pipeline {
+#                           agent any
+#                           stages {
+#                               stage('Verify Setup') {
+#                                   steps {
+#                                       echo '✅ JCasC and Job DSL are working perfectly!'
+#                                       sh 'java -version'
+#                                   }
+#                               }
+#                               stage('Verify Setup2') {
+#                                   steps {
+#                                       echo '✅ JCasC and Job DSL are working perfectly!'
+#                                       sh 'java -version'
+#                                   }
+#                               }
+#                               stage('Verify Setup3') {
+#                                   steps {
+#                                       echo '✅ JCasC and Job DSL are working perfectly!'
+#                                       sh 'java -version'
+#                                   }
+#                               }
+#                               stage('Verify Setup4') {
+#                                   steps {
+#                                       echo '✅ JCasC and Job DSL are working perfectly!'
+#                                       sh 'java -version'
+#                                   }
+#                               }
+#                           }
+#                       }
+#                   '''.stripIndent())
+#                   sandbox(true)
+#               }
+#           }
+#       }

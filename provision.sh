@@ -33,6 +33,8 @@ systemctl restart k3s
 
 Start services using docker-compose
 cd /home/vagrant/gridsensor-simulator
+# docker-compose build
+# docker-compose pull
 # docker-compose up -d
 
 # echo "Waiting for Jenkins to start..."

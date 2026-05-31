@@ -20,31 +20,31 @@ services:
     volumes:
       - jenkins_home:/var/jenkins_home
     restart: unless-stopped
-    depends_on:
-      - dind
-      - registry
+    # depends_on:
+    #   - dind
+    #   - registry
 
-  dind:
-    image: docker:dind
-    container_name: dind
-    privileged: true
-    command: ["--host=tcp://0.0.0.0:2375", "--insecure-registry=registry:5000"]
-    expose:
-      - "2375"
-    environment:
-      - DOCKER_TLS_CERTDIR=
-    volumes:
-      - dind_storage:/var/lib/docker
-    restart: unless-stopped
+  # dind:
+  #   image: docker:dind
+  #   container_name: dind
+  #   privileged: true
+  #   command: ["--host=tcp://0.0.0.0:2375", "--insecure-registry=registry:5000"]
+  #   expose:
+  #     - "2375"
+  #   environment:
+  #     - DOCKER_TLS_CERTDIR=
+  #   volumes:
+  #     - dind_storage:/var/lib/docker
+  #   restart: unless-stopped
 
-  registry:
-    image: registry:2
-    container_name: registry
-    ports:
-      - "5000:5000"
-    restart: unless-stopped
-    volumes:
-      - registry_data:/var/lib/registry
+  # registry:
+  #   image: registry:2
+  #   container_name: registry
+  #   ports:
+  #     - "5000:5000"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - registry_data:/var/lib/registry
 
   # gitserver:
   #   image: codeberg.org/forgejo/forgejo:15

@@ -13,3 +13,5 @@ RUN jenkins-plugin-cli --plugins configuration-as-code job-dsl workflow-aggregat
 
 # Copy our configuration file into the container
 COPY casc.yaml /var/jenkins_home/casc_configs/casc.yaml
+COPY helloworld-jobs.groovy /var/jenkins_home/dsl/helloworld-jobs.groovy
+# COPY Jenkinsfile /project
