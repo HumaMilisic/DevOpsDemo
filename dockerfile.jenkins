@@ -1,6 +1,25 @@
 # Start from the official Jenkins LTS image
 FROM jenkins/jenkins:lts
 
+# Switch to root to install the Docker CLI
+USER root
+
+# Install the Docker CLI only (ce-cli)
+RUN apt-get update && apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
+    && apt-get update && apt-get install -y docker-ce-cli \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch back to the safe jenkins user
+USER jenkins
+
 # Skip the initial setup wizard
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true"
 
@@ -8,14 +27,9 @@ ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.Glo
 ENV CASC_JENKINS_CONFIG="/var/jenkins_home/casc_configs/casc.yaml"
 
 # Pre-install the required plugins using the Jenkins CLI tool
-# workflow-aggregator pulls in the standard Pipeline plugins
 RUN jenkins-plugin-cli --plugins configuration-as-code docker-workflow kubernetes-cli workflow-aggregator git job-dsl
 
-RUN echo "-----------------------------------------------------------"
-
-# # Copy our configuration file into the container
+# Copy configuration files into the container
 COPY casc.yaml /var/jenkins_home/casc_configs/casc.yaml
-
 COPY helloworld-jobs.groovy /var/jenkins_home/dsl/helloworld-jobs.groovy
 COPY application-jobs.groovy /var/jenkins_home/dsl/application-jobs.groovy
-# COPY Jenkinsfile /project
